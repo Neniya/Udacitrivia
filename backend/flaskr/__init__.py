@@ -198,7 +198,7 @@ def create_app(test_config=None):
     # take category and previous question parameters
     previous_questions = body.get('previous_questions')  
     quiz_category = body.get('quiz_category') 
-   
+
     try:
       if quiz_category['id'] == 0:
         # all categories
@@ -210,9 +210,7 @@ def create_app(test_config=None):
                   Question.id.notin_(previous_questions)).all()
       # get a random question             
       current_question = random.choices(questions, k=1)[0].format() if len(questions) else None
-    
-      print(current_question)
-      print(len(current_question))   
+   
       return jsonify({
             'success': True,
             'question': current_question
