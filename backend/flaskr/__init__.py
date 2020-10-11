@@ -2,6 +2,7 @@ import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from  sqlalchemy.sql.expression import func
 import random
 
 from models import setup_db, Question, Category
@@ -74,7 +75,7 @@ def create_app(test_config=None):
 
   # DELETE question using a question ID
   # When you click the trash icon next to a question
-  @app.route('/questions/<int:question_id>', methods = ['DELETE', 'GET'])
+  @app.route('/questions/<int:question_id>', methods = ['DELETE'])
   def delete_question(question_id):
     try:
       question = Question.query.filter(Question.id == question_id).one_or_none()
@@ -95,6 +96,7 @@ def create_app(test_config=None):
 
       return jsonify({
         'success': True,
+        'deleted': question_id,
         'questions': current_questions,
         'total_questions': len(questions),
         'categories': formatted_categories,
@@ -105,16 +107,17 @@ def create_app(test_config=None):
 
   
   # POST a new question
-  @app.route('/questions/add', methods=['POST', 'GET'])
+  @app.route('/questions/add', methods=['POST'])
   def create_question():
-    body = request.get_json()
+    #body = request.get_json()
     # get data for new question
     new_question = request.json.get('question')
     new_answer = request.json.get('answer')
     new_difficulty = request.json.get('difficulty')
     new_category = request.json.get('category')
-    if len(new_question)== 0 or len(new_answer)==0:
-      abort(220)
+    if (new_question is None or new_answer is None 
+        or len(new_question)== 0 or len(new_answer)==0):
+      abort(422)
     try:
       #POST
       question = Question(
@@ -127,6 +130,7 @@ def create_app(test_config=None):
           
       return jsonify({
         'success': True,
+        'created': question.id,
         'total_questions': len(selection)
       })
     except:
@@ -198,19 +202,16 @@ def create_app(test_config=None):
     # take category and previous question parameters
     previous_questions = body.get('previous_questions')  
     quiz_category = body.get('quiz_category') 
-
+    # get a random question  
     try:
       if quiz_category['id'] == 0:
         # all categories
-        questions = Question.query.filter(Question.id.notin_(previous_questions)).all()
-    
+        current_question = Question.query.filter(Question.id.notin_(previous_questions)).order_by(func.random()).first().format()   
       else:
         # given category
-        questions = Question.query.filter_by(category=quiz_category['id']).filter(
-                  Question.id.notin_(previous_questions)).all()
-      # get a random question             
-      current_question = random.choices(questions, k=1)[0].format() if len(questions) else None
-   
+        current_question = Question.query.filter_by(category=quiz_category['id']).filter(
+                  Question.id.notin_(previous_questions)).order_by(func.random()).first().format()
+                    
       return jsonify({
             'success': True,
             'question': current_question

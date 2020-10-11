@@ -64,12 +64,22 @@ class TriviaTestCase(unittest.TestCase):
 
     # test delete question
     def test_delete_question(self):
-        res = self.client().delete('/questions/49')
+        
+        new_question = {
+            'question': 'How many time zones are there in Russia?',
+            'answer': '11',
+            'category': '3',
+            'difficulty': 3}
+        res_new = self.client().post('/questions/add', json = new_question)
+        data_new = json.loads(res_new.data)  
+        id_new = data_new['created']  
+        res = self.client().delete('/questions/{}'.format(id_new))
         data = json.loads(res.data)
 
-        question = Question.query.filter(Question.id ==49 ).one_or_none()
+        question = Question.query.filter(Question.id == id_new).one_or_none()
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
+        self.assertEqual(data['deleted'], id_new)
         self.assertEqual(data['current_category'], None)
         self.assertTrue(len(data['questions']))
         self.assertTrue(data['total_questions'])
@@ -103,6 +113,7 @@ class TriviaTestCase(unittest.TestCase):
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
+        self.assertTrue(data['created'])
         self.assertTrue(data['total_questions'])
     
     
@@ -118,13 +129,13 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'resource not found') 
 
-     def test_422_if_question_creation_empty_data(self):
+    def test_422_if_question_creation_empty_data(self):
         new_question = {
             'question': '',
             'answer': '11',
-            'category': 3,
+            'category': '3',
             'difficulty': 3}
-        res = self.client().post('/question/add', json= new_question)
+        res = self.client().post('/questions/add', json= new_question)
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 422)
         self.assertEqual(data['success'], False)
