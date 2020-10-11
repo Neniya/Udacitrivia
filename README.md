@@ -246,7 +246,7 @@ The API will return three error types when requests fail:
 * General:
   * Deletes the question of the given ID if it exists.
   * Arguments: question_id
-  * Returns: Success value, a list of question objects based on a current page number to update the front end, an object with a single key, categories, that contains an object of id: category_string key:value pairs, current category and the total number of questions.  
+  * Returns: Success value, id of deleted question, a list of question objects based on a current page number to update the front end, an object with a single key, categories, that contains an object of id: category_string key:value pairs, current category and the total number of questions.  
 * Sample: `curl -X DELETE http:/127.0.0.1:5000/questions/5?page=1`
 ```
 "categories": {
@@ -257,6 +257,7 @@ The API will return three error types when requests fail:
 "5": "Entertainment", 
 "6": "Sports"
 }, 
+"deleted": 5,
 "current_category": null, 
 "questions": [
 {
@@ -339,8 +340,9 @@ The API will return three error types when requests fail:
     * Creates a new question.
     * Request Arguments: question(string, text of new question), answer(string, answer to the question) difficulty(num, from 1 to 5), category(string, id of categiry)
     * Returns: Success value and the total number of questions.   
-* Sample: `curl http:/127.0.0.1:5000/questions/add -X POST -H "Content-Type: application/json" -d '{"question": "How many stripes are there on the US flag?","answer": '13', "category": '4', "difficulty": 4}'`
+* Sample: `curl http:/127.0.0.1:5000/questions/add -X POST -H "Content-Type: application/json" -d '{"question": "How many stripes are there on the US flag?","answer": "13", "category": "4", "difficulty": 4}'`
 ```
+"created": 31,
 "success": true, 
 "total_questions": 18
 ```
